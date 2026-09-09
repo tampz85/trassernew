@@ -6,7 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
-    "trace": "node src/cli.js",
+    "trace": "node src/index.js",
     "test": "jest --runInBand",
     "test:visual": "node test/visual-test.js"
   },
@@ -25,6 +25,8 @@
   },
   "devDependencies": {
     "jest": "^30.0.5",
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0",
     "puppeteer": "^24.16.0"
   },
   "engines": {
