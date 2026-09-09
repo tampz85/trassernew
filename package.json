@@ -1,0 +1,33 @@
+{
+  "name": "image-tracing-app",
+  "version": "1.0.0",
+  "description": "Raster-to-SVG image tracing application for Node.js and browsers.",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "trace": "node src/cli.js",
+    "test": "jest --runInBand",
+    "test:visual": "node test/visual-test.js"
+  },
+  "keywords": [
+    "image-tracing",
+    "svg",
+    "sharp",
+    "potrace",
+    "puppeteer"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.1.0",
+    "imagetracerjs": "^1.2.6",
+    "sharp": "^0.34.3"
+  },
+  "devDependencies": {
+    "jest": "^30.0.5",
+    "puppeteer": "^24.16.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
