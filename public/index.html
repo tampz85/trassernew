@@ -55,6 +55,14 @@
 </head>
 <body>
   <h1>Image Tracer — Visual Test</h1>
+  <label>Image
+    <select id="imageSelect">
+      <option value="test1.png">test1.png</option>
+      <option value="test2.jpg">test2.jpg</option>
+      <option value="test3.png">test3.png</option>
+      <option value="test4.png">test4.png</option>
+    </select>
+  </label>
   <main>
     <section>
       <h2>Original</h2>
@@ -73,6 +81,10 @@
     const runTestButton = document.getElementById('runTest');
     const logElement = document.getElementById('log');
 
+    const imageSelect = document.getElementById('imageSelect');
+    const requestedImage = new URLSearchParams(window.location.search).get('image') || 'test1.png';
+    if (['test1.png', 'test2.jpg', 'test3.png', 'test4.png'].includes(requestedImage)) imageSelect.value = requestedImage;
+
     function log(message) {
       logElement.textContent += `${message}\n`;
       logElement.scrollTop = logElement.scrollHeight;
@@ -86,8 +98,8 @@
       context.drawImage(image, (width - drawnWidth) / 2, (height - drawnHeight) / 2, drawnWidth, drawnHeight);
     }
 
-    async function loadOriginal() {
-      const response = await fetch('/test-images/test1.png');
+    async function loadOriginal(imagePath = imageSelect.value) {
+      const response = await fetch(`/test-images/${encodeURIComponent(imagePath)}`);
       if (!response.ok) throw new Error(`Could not load test image: HTTP ${response.status}`);
       const blob = await response.blob();
       const image = await createImageBitmap(blob);
@@ -110,16 +122,16 @@
       }
     }
 
-    async function runBrowserTest(options) {
+    async function runBrowserTest({ imagePath = imageSelect.value, options = {} } = {}) {
       runTestButton.disabled = true;
       logElement.textContent = '';
       log('stdout: browser visual test started');
       try {
-        await loadOriginal();
+        await loadOriginal(imagePath);
         const response = await fetch('/api/trace', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imagePath: 'test1.png', options })
+          body: JSON.stringify({ imagePath, options })
         });
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.error || `Trace failed: HTTP ${response.status}`);
@@ -139,14 +151,20 @@
 
     runTestButton.addEventListener('click', async () => {
       try {
-        await runBrowserTest({ threshold: 128, minArea: 4 });
+        await runBrowserTest({ imagePath: imageSelect.value, options: { threshold: 128, minArea: 10, palette: 2, smooth: true } });
       } catch (error) {
         log(`stderr: ${error.message}`);
       }
     });
+    imageSelect.addEventListener('change', () => {
+      const nextUrl = new URL(window.location.href);
+      nextUrl.searchParams.set('image', imageSelect.value);
+      window.history.replaceState(null, '', nextUrl);
+      loadOriginal().catch((error) => log(`stderr: ${error.message}`));
+    });
 
     window.runBrowserTest = runBrowserTest;
-    loadOriginal().catch((error) => log(`stderr: ${error.message}`));
+    loadOriginal(requestedImage).catch((error) => log(`stderr: ${error.message}`));
   </script>
 </body>
 </html>

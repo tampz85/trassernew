@@ -59,13 +59,14 @@ function filterSmallPaths(tracedata, minArea) {
 
 function buildTracerOptions(options) {
   const palette = options.palette ? clonePalette(options.palette) : undefined;
+  const smooth = options.smooth !== false;
   const tracerOptions = {
-    ltres: Number.isFinite(options.ltres) ? options.ltres : 1,
-    qtres: Number.isFinite(options.qtres) ? options.qtres : 1,
+    ltres: Number.isFinite(options.ltres) ? options.ltres : (smooth ? 1 : 0.2),
+    qtres: Number.isFinite(options.qtres) ? options.qtres : (smooth ? 1 : 0.2),
     pathomit: Number.isFinite(options.pathomit) ? options.pathomit : 8,
     rightangleenhance: options.rightangleenhance !== false,
     colorsampling: palette ? 0 : 2,
-    numberofcolors: palette ? palette.length : 16,
+    numberofcolors: palette ? palette.length : (options.paletteSize || 16),
     mincolorratio: 0,
     colorquantcycles: palette ? 1 : 3,
     layering: 0,
