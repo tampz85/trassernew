@@ -83,7 +83,7 @@ function normalizeOptions(options = {}) {
 
   const normalized = { ...options };
   normalized.threshold = finiteOption(options.threshold, 'threshold', 0, 255);
-  normalized.blur = finiteOption(options.blur, 'blur', 0, 1000);
+  normalized.blur = finiteOption(options.blur, 'blur', 0, 5);
   normalized.minArea = finiteOption(options.minArea, 'minArea', 0, Number.MAX_SAFE_INTEGER);
   normalized.ltres = finiteOption(options.ltres, 'ltres', 0, Number.MAX_SAFE_INTEGER);
   normalized.qtres = finiteOption(options.qtres, 'qtres', 0, Number.MAX_SAFE_INTEGER);
@@ -91,14 +91,22 @@ function normalizeOptions(options = {}) {
   normalized.strokewidth = finiteOption(options.strokewidth, 'strokewidth', 0, Number.MAX_SAFE_INTEGER);
   normalized.scale = finiteOption(options.scale, 'scale', 0, Number.MAX_SAFE_INTEGER);
   normalized.roundcoords = finiteOption(options.roundcoords, 'roundcoords', -1, 20);
+  if (options.smooth !== undefined && typeof options.smooth !== 'boolean') throw new TypeError('smooth must be a boolean');
+  normalized.smooth = options.smooth === undefined ? true : options.smooth;
 
   if (options.palette !== undefined) {
-    if (!Array.isArray(options.palette) || options.palette.length === 0) {
-      throw new TypeError('palette must be a non-empty array');
+    if (Number.isInteger(options.palette) && options.palette >= 2 && options.palette <= 16) {
+      normalized.palette = undefined;
+      normalized.paletteSize = options.palette;
+    } else if (Array.isArray(options.palette) && options.palette.length > 0) {
+      normalized.palette = options.palette.map(parseColor);
+      normalized.paletteSize = undefined;
+    } else {
+      throw new TypeError('palette must be a number from 2 to 16 or a non-empty color array');
     }
-    normalized.palette = options.palette.map(parseColor);
   } else {
     normalized.palette = undefined;
+    normalized.paletteSize = undefined;
   }
   return normalized;
 }
